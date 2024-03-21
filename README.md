@@ -1,3 +1,5 @@
+# The ArXiV Daily Post
+
 Extra! Extra! Read all about it! 📰🗞️
 
 Introducing "The ArXiv Daily Post"! 🎉📜
