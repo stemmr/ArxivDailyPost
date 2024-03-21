@@ -2,6 +2,8 @@ import urllib, urllib.request
 from datetime import datetime, timedelta
 import feedparser
 
+from papers import PaperManager
+
 base_url = 'http://export.arxiv.org/api/query?'
 
 today = datetime.now().date()
@@ -20,8 +22,12 @@ feed = feedparser.parse(response)
 total_results = feed.feed.opensearch_totalresults
 
 if __name__ == '__main__':
-    print(f"Over the past 24 Hours, {total_results} Computer Science papers have been published to the ArXiv")
-    for entry in feed.entries:
-        print("---------------")
-        print(entry.summary)
-        print("---------------")
+    manager = PaperManager()
+    papers = manager.daily_paper()
+    print(len(papers))
+
+    # print(f"Over the past 24 Hours, {total_results} Computer Science papers have been published to the ArXiv")
+    # for entry in feed.entries:
+    #     print("---------------")
+    #     print(entry.summary)
+    #     print("---------------")

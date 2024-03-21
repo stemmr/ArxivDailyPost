@@ -29,3 +29,9 @@ So, step right up and subscribe to "The ArXiv Daily Post"! Don't let the tsunami
 Stay informed, stay ahead, and never miss a groundbreaking paper again! 🎉📚
 
 Get your copy of "The ArXiv Daily Post" today! 🗞️💸
+
+
+### References
+1. https://github.com/allenai/scirepeval
+2. SPECTER2: https://huggingface.co/allenai/specter2
+3. ArXiv API: https://info.arxiv.org/help/api/index.html
