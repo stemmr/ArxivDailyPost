@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 import feedparser
 from dataclasses import dataclass
 from typing import List, Optional
+from transformers import AutoTokenizer
+from adapters import AutoAdapterModel
 
 @dataclass
 class Paper:
@@ -18,11 +20,15 @@ class PaperManager:
 
     def __init__(self):
         # Which embeddings to use
-        pass
+        self.tokenizer = AutoTokenizer.from_pretrained('allenai/specter2_base')
+        self.model = AutoAdapterModel.from_pretrained('allenai/specter2_base')
+        
+        self.model.load_adapter("allenai/specter2", source="hf", load_as="specter2", set_active=True)
 
-    def daily_paper(self) -> List[Paper]:
+
+    def daily_paper(self, days=1) -> List[Paper]:
         today = datetime.now().date()
-        yesterday = today - timedelta(days=1)
+        yesterday = today - timedelta(days=days)
         start_date = yesterday.strftime("%Y%m%d")
         end_date = today.strftime("%Y%m%d")
 
@@ -30,14 +36,11 @@ class PaperManager:
         start = 0
         # Max allowed results per query. Unlikely there will be a day with this papers published.
         max_results=10000
-        query = f"search_query={urllib.parse.quote(search_query)}&start={start}&max_results={max_results}&sortBy=submittedDate&sortOrder=descending"
-
-        results = []
-        # Paginated retrieval of papers
+        
         query = f"search_query={urllib.parse.quote(search_query)}&start={start}&max_results={max_results}&sortBy=submittedDate&sortOrder=descending"
         response = urllib.request.urlopen(self.arxiv_base_url + query)
         feed = feedparser.parse(response)
-        
+        print(len(feed.entries))
         papers = []
         for paper in feed.entries:
             papers.append(Paper(
@@ -52,4 +55,10 @@ class PaperManager:
         return papers
 
     def paper_embeddings(self, papers: List[Paper]):
-        pass
+        batch = [paper.title + self.tokenizer.sep_token + paper.abstract for paper in papers]
+        inputs = self.tokenizer(batch, padding=True, truncation=True,
+                                   return_tensors="pt", return_token_type_ids=False, max_length=512)
+        output = self.model(**inputs)
+        
+        embeddings = output.last_hidden_state[:, 0, :].detach()
+        return embeddings
